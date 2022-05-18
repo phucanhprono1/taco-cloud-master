@@ -8,29 +8,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.extern.slf4j.Slf4j;
 import tacos.data.IngredientRepository;
 import tacos.Ingredient;
-@Slf4j
-@Controller
-@RequestMapping("/ingredient")
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.server.EntityLinks;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+@RequestMapping(path = "/ingredients", produces = "application/json")
+@CrossOrigin(origins = "*")
 public class IngredientController {
     private final IngredientRepository ingredientRepo;
 
-    @Autowired
     public IngredientController(IngredientRepository ingredientRepo) {
-
         this.ingredientRepo = ingredientRepo;
-
     }
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("ingredient", new Ingredient(null, null, null));
-        return "addIngredient";
+    @GetMapping
+    public Iterable<Ingredient> getAllIngredients() {
+        return ingredientRepo.findAll();
     }
 
-    @PostMapping
-    public String addIngredient(Ingredient ingredient, Model model) {
-        ingredientRepo.save(ingredient);
-        model.addAttribute(ingredient);
-        log.info("Ingredient saved: " + ingredient);
-        return "addIngredientSuccess";
+    @GetMapping("/{id}")
+    public Ingredient ingredientById(@PathVariable("id") String id) {
+        Optional<Ingredient> optIngredient = ingredientRepo.findById(id);
+        return optIngredient.orElse(null);
     }
 }
